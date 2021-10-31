@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>I'm a hidden worker</title>
+</head>
+<body>
+<script>
+    const messages = require('./scripts/messages');
+    const runningTasks = require('./scripts/runningTasks');
+    const {ipcRenderer} = require('electron');
+    const {_} = require('lodash');
+    const CnftMain = require('./scripts/cnft-main');
+    const cnftMain = new CnftMain({});
+
+    ipcRenderer.on('call-running-tasks', (event, arg) => {
+        ipcRenderer.send('get-running-tasks', runningTasks);
+    });
+
+
+    ipcRenderer.on('start-task', (event, arg) => {
+        this.frontEndMessage('Starting...', arg.id, 'info', false);
+        arg.running = true;
+        runningTasks.push(arg);
+        cnftMain.startTask(arg);
+
+    });
+
+    ipcRenderer.on('start-all', (event, arg) => {
+        let tasks = arg;
+        for (let j = 0; j < tasks.length; j++) {
+            let task = tasks[j];
+            task.running = true;
+            this.frontEndMessage('Starting...', task.id, 'info', false);
+            runningTasks.push(task);
+            cnftMain.startTask(task);
+        }
+    });
+
+    ipcRenderer.on('stop-task', (event, arg) => {
+        this.frontEndMessage('Stopping...', arg.id, 'error', false);
+        _.remove(runningTasks, {id: arg.id})
+        this.frontEndMessage('Stopped', arg.id, 'error', false);
+    });
+
+    ipcRenderer.on('stop-all', (event, arg) => {
+        arg.map((task) => {
+            this.frontEndMessage('Stopping...', task.id, 'error', false);
+            _.remove(runningTasks, {id: task.id})
+            this.frontEndMessage('Stopped', task.id, 'error', false);
+        })
+    });
+
+    setInterval(async function () {
+        ipcRenderer.send('task-status', messages);
+    }, 300);
+
+    function frontEndMessage(message, taskId, type, cart) {
+        let newMessage = {'id': taskId, 'action': message, 'type': type, 'cart': cart}
+        _.remove(messages, {'id': taskId})
+        messages.push(newMessage);
+    }
+
+</script>
+</body>
+</html>
