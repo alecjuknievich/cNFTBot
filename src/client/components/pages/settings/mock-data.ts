@@ -25,6 +25,17 @@ export const changelog = [
     version: '0.1.23',
     info: 'Policy id monitor mode has additional check on listing to make sure its not reserved before attempting to reserve.' +
         ' also major speed improvements for policy id monitoring'
+  },
+  {
+    version: '0.1.3',
+    info: 'Overall task handling improvements' +
+        ' Improved Error handling and task status updates' +
+        ' Changed monitor modes to floor monitoring and feature filtering. Feature filtering only works for non-custom projects' +
+        'Added new projects for feature filtering'
+  },
+  {
+    version: '0.1.31',
+    info: 'CNFT fixes to account for new bot security updates. Monitoring by feature is disable for now.'
   }
 ]
 

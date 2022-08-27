@@ -353,11 +353,11 @@ export function NewTaskModal({ toggleModal }: NewTaskModalProps) {
         <>
           <option value=""></option>
           <option value="floorSnipe">Floor</option>
-          {
-            project !== 'custom' && (
-                <option value="filterFeatures">Filter by Feature</option>
-            )
-          }
+          {/*{*/}
+          {/*  project !== 'custom' && (*/}
+          {/*      <option value="filterFeatures">Filter by Feature</option>*/}
+          {/*  )*/}
+          {/*}*/}
         </>
       </TextInput>
       {project === "derpbirds" && monitorMode === "filterFeatures" && (

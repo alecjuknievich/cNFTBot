@@ -35,7 +35,6 @@ export async function startTasks(t: newTask) {
         webhook: userWebhook
     }
 
-    task.profileString = `email=${encodeURIComponent(task.profile.email)}&password=${encodeURIComponent(task.profile.password)}`
     electron.ipcRenderer.send('start-task', task)
 
 }
@@ -103,10 +102,6 @@ export async function startAll() {
             } else {
                 const sweepStatus = setSweepStatus(task.mode);
                 let profile = _.find(profiles, {'profileName': task.profile})
-                let profileString = ''
-                if (profile) {
-                    profileString = `email=${encodeURIComponent(profile.email)}&password=${encodeURIComponent(profile.password)}`
-                }
 
                 let verifiedStatus = true;
                 if (task.verified) {
@@ -130,7 +125,6 @@ export async function startAll() {
                     monitorMode: task.monitorMode,
                     project: task.project,
                     parameters: task.parameters,
-                    profileString: profileString,
                     policyId: task.policyId,
                     verified: verifiedStatus,
                     webhook: userWebhook
@@ -139,8 +133,6 @@ export async function startAll() {
                 return t;
             }
         })
-
-
 
         // @ts-ignore
         // eslint-disable-next-line

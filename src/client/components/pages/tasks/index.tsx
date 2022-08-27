@@ -113,7 +113,7 @@ const Tasks = () => {
         <CounterWrapper> <TaskCount /> Tasks | {cartCount} Carted | {successCount} Success</CounterWrapper>
         <PrimaryControls>
           <Button style={{ maxWidth: '2em'}} onClick={toggleTaskModal} icon={faPlus} color={theme.success}/>
-          {/*<Button style={{ maxWidth: '2em'}} icon={faRedo} color={theme.info}/>*/}
+          {/*<Button style={{ maxWidth: '2em'}} icon={faRedo} color={theme.info} onClick={() => {electron.ipcRenderer.send('open-captcha-harvester', 'open')}}/>*/}
           {/*<Button style={{ maxWidth: '2em'}} onClick={toggleEditModal} icon={faEdit} color={theme.warn}/>*/}
           {/*<TextInput secondary type="number" placeholder="Monitor Delay (ms)" />*/}
           <Button icon={faPlayCircle} color={theme.success} onClick={startAll} text="Start All"/>

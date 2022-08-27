@@ -47,7 +47,7 @@ class cnftMain {
             this.frontEndMessage('Checking listings...', monitorInput.id, 'info', false);
             cnftApi.getListings(monitorInput.policyId, monitorInput.verified, monitorInput.priceLimit).then((res) => {
                 this.frontEndMessage(`Found ${res.found}!`, monitorInput.id, 'info', false);
-                cnftApi.parseListings(res.assets, monitorInput.priceLimit).then((res) => {
+                cnftApi.parseListings(res.results, monitorInput.priceLimit).then((res) => {
                     if (monitorInput.sweep && res.nfts.length > 1 && this.runStatus(monitorInput.id)) {
                         this.frontEndMessage('Sweep Found! Sweeping...', monitorInput.id, 'warn', true);
                         cnftApi.reserveSweep(monitorInput.token, res.nfts, monitorInput.id);
@@ -80,7 +80,7 @@ class cnftMain {
 
     async login(monitorInput) {
         if (this.runStatus(monitorInput.id)) {
-            cnftApi.getLoginToken(true, monitorInput.profileString, monitorInput.id).then((token) => {
+            cnftApi.getLoginToken(true, monitorInput.profile.email, monitorInput.profile.password, monitorInput.id).then((token) => {
                 if (token && this.runStatus(monitorInput.id)) {
                     this.frontEndMessage('Logged in', monitorInput.id, 'info', false);
                     monitorInput.token = token;

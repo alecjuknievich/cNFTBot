@@ -39,10 +39,10 @@ class CnftTools {
         });
     }
 
-    async getLoginToken(isHeadLess, profileString, taskId) {
+    async getLoginToken(isHeadLess, email, pw, taskId) {
         return new Promise(async (resolve, reject) => {
             this.frontEndMessage('Creating Browser...', taskId, 'info', false);
-            let link = 'https://cnft.io';
+            let link = 'https://cnft.io/login';
             const browser = await playwright['firefox'].launch({
                 headless: isHeadLess
             });
@@ -92,41 +92,23 @@ class CnftTools {
             page.on('response', logRequest)
             await page.goto(link);
             this.frontEndMessage('Logging In...', taskId, 'info', false);
-            await page.evaluate((profileString) => {
-                login()
-
-                async function login() {
-
-                    fetch("https://api.cnft.io/auth/login", {
-                        "headers": {
-                            "accept": "*/*",
-                            "accept-language": "en-US,en;q=0.9",
-                            "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
-                            "sec-ch-ua": '\"Chromium\";v=\"94\", \"Google Chrome\";v=\"94\", \";Not A Brand\";v=\"99\"',
-                            "sec-ch-ua-mobile": "?0",
-                            "sec-ch-ua-platform": "\"Windows\"",
-                            "sec-fetch-dest": "empty",
-                            "sec-fetch-mode": "cors",
-                            "sec-fetch-site": "same-site"
-                        },
-                        "referrer": "https://cnft.io/",
-                        "referrerPolicy": "strict-origin-when-cross-origin",
-                        "body": profileString,
-                        "method": "POST",
-                        "mode": "cors",
-                        "credentials": "omit"
-                    }).then((data) => {
-                        console.log(data);
-                    })
-                }
-            }, profileString);
-
+            await page.fill('input:below(:text("Email Address"))', email);
+            await page.fill('input:below(:text("Password"))', pw);
+            await page.evaluate(() => {
+                // eslint-disable-next-line no-undef
+                grecaptcha.ready(function() {
+                    // eslint-disable-next-line no-undef
+                    grecaptcha.execute().then(function(token) {
+                        console.log(token);
+                    });
+                });
+            });
 
             async function logRequest(interceptedRequest) {
                 interceptedRequest.json().then(async (e) => {
-                    if (e.token) {
+                    if (e.accessToken) {
                         browser.close();
-                        resolve(e.token);
+                        resolve(e.accessToken);
                     } else if (e === 'Invalid Credentials') {
                         reject(e);
                     } else {
@@ -141,9 +123,8 @@ class CnftTools {
 
     reserve(account, cnftID, taskId) {
         try {
-            reqs.apiCall('https://api.cnft.io/market/buy', 'POST', {
-                token: account,
-                listingID: cnftID
+            reqs.apiCall(`https://api.cnft.io/market/purchase/${cnftID}`, 'POST', {}, {
+                authorization: `Bearer: ${account}`
             }).then((msg) => {
                 this.frontEndMessage('Reserved!', taskId, 'success', false);
                 console.log(msg);
@@ -180,14 +161,19 @@ class CnftTools {
     async getListings(policyId, verified, priceLimit) {
         return new Promise(((resolve, reject) => {
             reqs.apiCall('https://api.cnft.io/market/listings', 'POST', {
+                nsfw: false,
                 search: policyId,
-                sort: 'price',
+                sort: {
+                    price: 1
+                },
                 page: 1,
-                order: 'asc',
                 verified: verified,
-                pricemax: priceLimit
+                types: ["listing"],
+                priceMax: priceLimit * 10 ** 6,
+                sold: false,
+                priceMin: 0
             }).then((res) => {
-                if (res.found > 0) {
+                if (res.results.length > 0) {
                     resolve(res);
                 } else {
                     resolve('No results found, Retrying...');
@@ -201,12 +187,11 @@ class CnftTools {
     parseListings(listings, priceLimit) {
         return new Promise(((resolve, reject) => {
             const snipeListings = [];
-            console.log(listings)
             for (let i = 0; i < listings.length; i++) {
                 let listing = listings[i];
                 listing.price = listing.price * 10 ** -6;
-                if (priceLimit >= listing.price && !listing.sold) {
-                    snipeListings.push(listing.id);
+                if (priceLimit >= listing.price) {
+                    snipeListings.push(listing._id);
                 }
             }
             if (!_.isNull(snipeListings)) {

@@ -1,0 +1,32 @@
+<!DOCTYPE html >
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>CNFT.IO</title>
+
+<body>
+<img src="g0R9.gif" alt="Waiting for captcha" style="width:350px;height:370px;">
+<button onclick="onClick(event)">Click</button>
+
+
+</body>
+
+<script src="https://www.google.com/recaptcha/api.js?render=6LfL2g4dAAAAAHLUfxlkENWJ7yAFMKNNIOsvGZQh"></script>
+
+<script>
+    const ipcRenderer = require('electron').ipcRenderer
+
+    function onClick(e) {
+        e.preventDefault();
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6LfL2g4dAAAAAHLUfxlkENWJ7yAFMKNNIOsvGZQh', {action: 'submit'}).then(function(token) {
+                ipcRenderer.send('sendCaptcha', token);
+            });
+        });
+    }
+
+
+</script>
+</html>

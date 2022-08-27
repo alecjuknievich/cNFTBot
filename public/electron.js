@@ -5,6 +5,7 @@ const path = require("path");
 const isDev = require("electron-is-dev");
 let mainWindow;
 let workerWindow;
+let captchaWindow;
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -25,7 +26,7 @@ function createWindow() {
     mainWindow.on("closed", () => (app.quit()));
 
     workerWindow = new BrowserWindow({
-        show: true,
+        show: false,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -56,6 +57,33 @@ function sendWindowMessage(targetWindow, message, payload) {
     }
     targetWindow.webContents.send(message, payload);
 }
+
+function openCaptchaHarvester() {
+    captchaWindow = new BrowserWindow({
+        show: true,
+        width: 375,
+        height: 550,
+        webPreferences: {
+            show: true,
+            resizable: false,
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    })
+    captchaWindow.loadURL(`file://${__dirname}/captcha-harvester.html`).catch((e) => {
+        console.log(e)
+    });
+    captchaWindow.setBackgroundColor('#000000')
+}
+
+electron.ipcMain.on('open-captcha-harvester', (event, arg) => {
+    openCaptchaHarvester();
+})
+
+electron.ipcMain.on('sendCaptcha', (event, arg) => {
+    console.log(arg);
+})
+
 electron.ipcMain.on('call-running-tasks', (event, arg) => {
     sendWindowMessage(workerWindow, 'call-running-tasks', arg);
 })

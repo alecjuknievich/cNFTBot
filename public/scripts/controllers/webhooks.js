@@ -21,7 +21,7 @@ class Webhooks {
                     },
                     {
                         name: "Link to buy:",
-                        value: `https://cnft.io/buy.php?s=${id}`
+                        value: `https://cnft.io/token/buy/${id}`
                     }
                 ]
             }]
